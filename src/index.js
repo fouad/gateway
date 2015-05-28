@@ -1,14 +1,13 @@
 'use strict';
 
-// Famous dependencies
-var DOMElement = require('famous/dom-renderables/DOMElement');
-var FamousEngine = require('famous/core/FamousEngine');
+import DOMElement from 'famous/dom-renderables/DOMElement';
+import FamousEngine from 'famous/core/FamousEngine';
+
+import {Carousel} from './carousel';
 
 // Boilerplate code to make your life easier
 FamousEngine.init();
 
-var Discover = require('./discover');
 var scene = FamousEngine.createScene();
 
-Discover(scene);
-
+new Carousel(scene);
