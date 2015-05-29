@@ -1,4 +1,4 @@
-import imageData from './data.json';
+import imageData from './dribbble.json';
 import FamousEngine from 'famous/core/FamousEngine';
 import DOMElement from 'famous/dom-renderables/DOMElement';
 import PhysicsEngine from 'famous/physics/PhysicsEngine';
@@ -58,6 +58,37 @@ export class Carousel {
         });
       }
     });
+
+    this.root.addUIEvent('wheel');
+  }
+
+  scroll(ev) {
+    let [x,y,z] = this.root.getPosition();
+    x += ev.centerDelta.x;
+    this.root.setPosition(x, y, z);
+    console.log(x);
+    let pos = new Position(this.root);
+    let totalDistance = ev.center.x - this.startX;
+    let change = totalDistance > 0 ? -1 : 1;
+    let totalWidth = window.innerWidth/2;
+    let percentDistance = Math.abs(totalDistance / totalWidth);
+    let distanceRemaining = Math.abs(percentDistance * totalWidth);
+    let transitionDuration = Math.abs(distanceRemaining / (ev.centerVelocity.x/1000));
+
+    console.log(totalDistance, change);
+
+    this.currentIndex = clamp(0, this.currentIndex + change, this.images.length - 1);
+    pos.setX(-0.5*window.innerWidth * this.currentIndex, {
+      duration: clamp(200, transitionDuration, 750),
+      curve: 'easeOut'
+    });
+  }
+
+  onReceive(type, ev) {
+    console.log(type, ev)
+    if (type === 'wheel') {
+      this.scroll(ev);
+    }
   }
 
   setCurrentImage(index) {
@@ -87,7 +118,7 @@ export class Image {
   constructor(root, url) {
     this.root = root
       .setSizeMode(1,1,1)
-      .setAbsoluteSize(500, 500, 0)
+      .setAbsoluteSize(500, 200, 0)
       .setMountPoint(0.5, 0.5, 0.5)
       .setOrigin(0.5, 0.5, 0.5)
       .setAlign(0.5, 0.5, 0.5);
@@ -95,7 +126,7 @@ export class Image {
     this.domElement = new DOMElement(this.root)
       .setProperty('backgroundImage', `url(${url})`)
       .setProperty('background-repeat', 'no-repeat')
-      .setProperty('background-size', 'cover');
+      // .setProperty('background-size', 'cover');
 
     this.gestureHandler = new GestureHandler(this.root);
 
